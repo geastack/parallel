@@ -1,0 +1,69 @@
+{
+  "name": "@geastack/parallel",
+  "version": "1.0.0",
+  "description": "Multithreaded array operations for TypeScript programs compiled with GeaStack, inspired by Rayon.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/geastack/parallel.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "dist",
+    "src",
+    "native",
+    "plugin",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./native": {
+      "types": "./native/index.d.ts",
+      "import": "./native/index.js"
+    },
+    "./plugin": "./plugin/index.mjs",
+    "./geatsc-plugin": "./plugin/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "geatsc": {
+    "plugin": "./plugin/index.mjs"
+  },
+  "peerDependencies": {
+    "@geastack/compiler": "^1.0.27"
+  },
+  "peerDependenciesMeta": {
+    "@geastack/compiler": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test test/*.test.mjs",
+    "test:refusals": "node test/run-refusals.mjs",
+    "test:native": "node test/run-native.mjs",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "keywords": [
+    "parallel",
+    "rayon",
+    "data-parallelism",
+    "geastack",
+    "typescript",
+    "multicore"
+  ],
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
