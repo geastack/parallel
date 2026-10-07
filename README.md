@@ -14,7 +14,9 @@ const primeCount = range(2, 10_000_000).mapReduce(
 const ranked = sorted(players, (a, b) => b.score - a.score)
 ```
 
-Compiled with GeaStack, each of these calls splits its input across every CPU core. Under Node, the same file runs one element at a time, like an ordinary loop. Both give the same result, down to the last bit of a floating-point sum. A program whose callbacks could make the two differ fails to compile.
+Compiled with GeaStack, each of these calls splits its input across every CPU core. A program whose callbacks could give a different answer depending on which thread ran first fails to compile.
+
+The same code also runs under Node, one element at a time. That isn't faster than writing the loop yourself; it's there so you can test and debug your program with ordinary tools. The compiled program gives exactly the Node result, down to the last bit of a floating-point sum.
 
 - [Install](#install)
 - [Using it](#using-it)
@@ -30,9 +32,7 @@ Compiled with GeaStack, each of these calls splits its input across every CPU co
 npm install @geastack/parallel
 ```
 
-Under Node, that is all. The library is plain TypeScript with no dependencies, and it runs sequentially.
-
-To run on multiple cores, compile your program with GeaStack (`@geastack/compiler` 1.0.27 or later). `gea build` loads the library's compiler plugin automatically from your dependencies. If you call the compiler directly, pass the plugin yourself:
+Compile your program with GeaStack (`@geastack/compiler` 1.0.27 or later). `gea build` loads the library's compiler plugin automatically from your dependencies. If you call the compiler directly, pass the plugin yourself:
 
 ```sh
 geatsc compile src/main.ts --out-dir build --plugin node_modules/@geastack/parallel/plugin/index.mjs
