@@ -38,7 +38,7 @@
     "plugin": "./plugin/index.mjs"
   },
   "peerDependencies": {
-    "@geastack/compiler": "^1.0.27"
+    "@geastack/compiler": "^1.0.29"
   },
   "peerDependenciesMeta": {
     "@geastack/compiler": {

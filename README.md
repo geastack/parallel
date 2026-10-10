@@ -32,7 +32,7 @@ The same code also runs under Node, one element at a time. That isn't faster tha
 npm install @geastack/parallel
 ```
 
-Compile your program with GeaStack (`@geastack/compiler` 1.0.27 or later). `gea build` loads the library's compiler plugin automatically from your dependencies. If you call the compiler directly, pass the plugin yourself:
+Compile your program with GeaStack (`@geastack/compiler` 1.0.29 or later). `gea build` loads the library's compiler plugin automatically from your dependencies. If you call the compiler directly, pass the plugin yourself:
 
 ```sh
 geatsc compile src/main.ts --out-dir build --plugin node_modules/@geastack/parallel/plugin/index.mjs

@@ -145,8 +145,39 @@ test('sorted is a stable sort that leaves its input alone', () => {
   }
 })
 
+test('sorted equals the stable Array sort on every input shape', () => {
+  const lengths = [0, 1, 2, 3, 5, 255, 256, 257, 511, 513, 4099, 65537]
+  const shapes = {
+    random: (length) => Array.from({ length }, (_, index) => (index * 2654435761) % 4093),
+    duplicates: (length) => Array.from({ length }, (_, index) => (index * 7919) % 5),
+    equal: (length) => Array.from({ length }, () => 3),
+    ascending: (length) => Array.from({ length }, (_, index) => index),
+    descending: (length) => Array.from({ length }, (_, index) => length - index),
+    sawtooth: (length) => Array.from({ length }, (_, index) => index % 300)
+  }
+  for (const [shape, keys] of Object.entries(shapes)) {
+    for (const length of lengths) {
+      const items = keys(length).map((key, index) => ({ key, index }))
+      const compare = (a, b) => a.key - b.key
+      const expected = [...items].sort(compare).map((item) => item.index)
+      assert.deepEqual(
+        sorted(items, compare).map((item) => item.index),
+        expected,
+        `${shape} at length ${length}`
+      )
+      // Descending by key, so ties still come out in input order.
+      const reverse = (a, b) => b.key - a.key
+      assert.deepEqual(
+        sorted(items, reverse).map((item) => item.index),
+        [...items].sort(reverse).map((item) => item.index),
+        `${shape} reversed at length ${length}`
+      )
+    }
+  }
+})
+
 test('sorted returns a permutation even for an inconsistent comparator', () => {
-  for (const length of sizes) {
+  for (const length of [...sizes, 65537]) {
     const items = input(length)
     let turn = 0
     const result = sorted(items, () => ((turn = (turn * 1103515245 + 12345) % 2147483648) % 3) - 1)
