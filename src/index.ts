@@ -38,6 +38,13 @@ function concatenated<U>(parts: readonly (readonly U[])[]): U[] {
   return parts.flat()
 }
 
+/** One value slot per leaf, each `initial` until its leaf writes it. */
+function filledSlotsOf<U>(leaves: number, initial: U): U[] {
+  const slots: U[] = []
+  for (let leaf = 0; leaf < leaves; leaf++) slots.push(initial)
+  return slots
+}
+
 /** One slot per leaf, `-1` until the leaf finds what it is looking for. */
 function hitSlotsOf(leaves: number): number[] {
   const hits: number[] = []
@@ -180,16 +187,19 @@ export class Operations<T> implements ParallelOperations<T> {
     const length = this.length
     const read = this.read
     const leaves = leavesFor(length)
-    const parts = slotsOf<U>(leaves)
+    // One value slot per leaf rather than a one-element array: an array per
+    // leaf was an allocation in every task, a deferred count at the join and
+    // a free after it, all serial on the joining thread.
+    const partials = filledSlotsOf(leaves, identity)
     tasks(leaves, (leaf) => {
       const end: int = boundary(leaf + 1, leaves, length)
       let accumulator = identity
       for (let index: int = boundary(leaf, leaves, length); index < end; index++) accumulator = combine(accumulator, fn(read(index), index))
-      parts[leaf] = [accumulator]
+      partials[leaf] = accumulator
       return false
     })
     let result = identity
-    for (const part of parts) result = combine(result, part[0]!)
+    for (const partial of partials) result = combine(result, partial)
     return result
   }
 }
