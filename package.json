@@ -1,6 +1,6 @@
 {
   "name": "@geastack/parallel",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Multithreaded array operations for TypeScript programs compiled with GeaStack, inspired by Rayon.",
   "type": "module",
   "license": "Apache-2.0",
