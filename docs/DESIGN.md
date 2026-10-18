@@ -123,5 +123,4 @@ See [`benchmarks/node/parallel`](https://github.com/geastack/benchmarks/tree/mai
 ## Non-goals and limits
 
 - **No shared mutable state, ever.** DashMap-style concurrent containers are a separate design: they need a write protocol the checker can certify. They are not a relaxation of this one.
-- **No interface-typed receivers in regions yet.** The library returns the concrete `Operations<T>` class rather than the `ParallelOperations<T>` interface, because the checker cannot yet name the targets of an interface-typed receiver. The interface is still exported for documentation and typing.
 - **`maxLeaves` is fixed.** Results must not depend on the machine, so the leaf count cannot follow the core count.
