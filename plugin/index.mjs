@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { inertPluginInstance } from '@geastack/compiler/plugin'
 
 // `@geastack/parallel/native` is implemented by the compiler's region runtime
-// (`gea::parallel::tasks` in gea_runtime.h), not by its JavaScript, which is
+// (`gea::parallel::tasks` and `tabulate` in gea_runtime.h), not by its JavaScript, which is
 // the sequential reference Node runs. Its functions are claimed by their
 // declaration file, so a program that declares its own `tasks` is never
 // mistaken for this one.
@@ -14,7 +14,10 @@ import { inertPluginInstance } from '@geastack/compiler/plugin'
 // counts are hooked the same way in all of them.
 const declarationFile = fileURLToPath(new URL('../native/index.d.ts', import.meta.url))
 const spellings = [...new Set([declarationFile, path.resolve(declarationFile), fs.realpathSync(declarationFile)])]
-const functions = new Map([['tasks', 'gea::parallel::tasks']])
+const functions = new Map([
+  ['tasks', 'gea::parallel::tasks'],
+  ['tabulate', 'gea::parallel::tabulate']
+])
 
 export function geatscPlugin() {
   return {
@@ -26,8 +29,8 @@ export function geatscPlugin() {
           ...inertPluginInstance.capabilities,
           declarationModules: new Set(['@geastack/parallel/native']),
           hostFunctionsByDeclaration: new Map(spellings.map((file) => [file, functions])),
-          hostPreambles: new Map([['gea::parallel::tasks', ['#define GEA_RUNTIME_PARALLEL 1']]]),
-          parallelRegionEntries: new Set(['gea::parallel::tasks'])
+          hostPreambles: new Map([...functions.values()].map((name) => [name, ['#define GEA_RUNTIME_PARALLEL 1']])),
+          parallelRegionEntries: new Set(functions.values())
         }
       }
     }

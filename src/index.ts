@@ -1,4 +1,4 @@
-import { tasks, type int } from '@geastack/parallel/native'
+import { tabulate, tasks, type int } from '@geastack/parallel/native'
 
 export type { int }
 
@@ -104,18 +104,11 @@ export class Operations<T> implements ParallelOperations<T> {
   ) {}
 
   map<U>(fn: (value: T, index: int) => U): U[] {
-    const length = this.length
     const read = this.read
-    const leaves = leavesFor(length)
-    const parts = slotsOf<U>(leaves)
-    tasks(leaves, (leaf) => {
-      const end: int = boundary(leaf + 1, leaves, length)
-      const out: U[] = []
-      for (let index: int = boundary(leaf, leaves, length); index < end; index++) out.push(fn(read(index), index))
-      parts[leaf] = out
-      return false
-    })
-    return concatenated(parts)
+    // One element per index, so the runtime sizes the result once and each
+    // task fills its own run of it: no array per leaf, and nothing to
+    // concatenate on the joining thread.
+    return tabulate(this.length, (index) => fn(read(index), index))
   }
 
   filter(fn: (value: T, index: int) => boolean): T[] {

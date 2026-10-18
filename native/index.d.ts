@@ -16,6 +16,19 @@
  */
 export declare function tasks(count: number, body: (index: int) => boolean): void
 
+/**
+ * The array whose element `index` is `body(index)`, for every index in
+ * `[0, length)`.
+ *
+ * Under Node it is the loop that pushes `body(0)`, `body(1)`, ... in order.
+ * Under GeaStack the result is sized once and the calls run on every core,
+ * each task storing its own run of elements straight into it, so nothing is
+ * concatenated afterwards. The compiler certifies `body` as it does a `tasks`
+ * body. If calls throw, the exception that escapes is the one from the lowest
+ * index, as in the loop.
+ */
+export declare function tabulate<U>(length: number, body: (index: int) => U): U[]
+
 declare const intBrand: unique symbol
 /**
  * GeaStack's opt-in 64-bit integer, as `@geastack/core` declares it: a number

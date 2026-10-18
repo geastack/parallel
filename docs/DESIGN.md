@@ -49,19 +49,22 @@ Each leaf is processed left to right into its own result slot, and the slots are
 
 Gathering in leaf order is what keeps equal elements in input order, and every element equal to a given one lands in the same piece. So for a consistent comparator the result is exactly `[...items].sort(compare)`. As with the other operations, the shape depends only on the input length, never on the core count.
 
-## The one primitive: `tasks`
+## The primitives: `tasks` and `tabulate`
 
-The library is written in plain TypeScript (`src/index.ts`) on top of exactly one native function, `tasks`, from `@geastack/parallel/native`:
+The library is written in plain TypeScript (`src/index.ts`) on top of two native functions from `@geastack/parallel/native`:
 
 ```ts
 export declare function tasks(count: number, body: (index: int) => boolean): void
+export declare function tabulate<U>(length: number, body: (index: int) => U): U[]
 ```
 
-Its JavaScript implementation (`native/index.js`) is the reference: `for (let i = 0; i < count; i++) if (body(i)) return`. A body that returns `true` has **decided** the operation: `findIndex` found its match, or `every` found a counterexample. A sequential loop would stop there.
+Their JavaScript implementations (`native/index.js`) are the reference. `tasks` is `for (let i = 0; i < count; i++) if (body(i)) return`. A body that returns `true` has **decided** the operation: `findIndex` found its match, or `every` found a counterexample. A sequential loop would stop there.
+
+`tabulate` is the loop that pushes `body(0)`, `body(1)`, … in order, and `map` is built on it. Natively, the runtime sizes the result once and each task stores its own run of elements straight into it. The same `map` on `tasks` filled an array per leaf, and the joining thread then concatenated them alone. With many short maps in a row, that serial gap was long enough for the workers to fall asleep between maps, and waking them cost more than the maps did.
 
 `int` is GeaStack's opt-in 64-bit integer type: a `number` under Node, a `long long` when compiled. Every task and element index is an `int`, so the library's loops and a callback's array accesses stay in integer arithmetic instead of converting a double at every step.
 
-Under GeaStack, the plugin (`plugin/index.mjs`) claims the declaration file and binds `tasks` to the runtime's `gea::parallel::tasks`. It does this by declaration file, not by name, so a program that declares its own `tasks` is never mistaken for it. It also declares `gea::parallel::tasks` a **parallel region entry**, which is what makes the compiler certify its callback. Finally, it adds `#define GEA_RUNTIME_PARALLEL 1` to the program's preamble, which turns on the region runtime described below.
+Under GeaStack, the plugin (`plugin/index.mjs`) claims the declaration file and binds `tasks` and `tabulate` to the runtime's `gea::parallel::tasks` and `gea::parallel::tabulate`. It does this by declaration file, not by name, so a program that declares its own `tasks` is never mistaken for it. It also declares both **parallel region entries**, which is what makes the compiler certify their callbacks. Finally, it adds `#define GEA_RUNTIME_PARALLEL 1` to the program's preamble, which turns on the region runtime described below.
 
 The package exports the plugin as `./geatsc-plugin`, the name `gea build` looks for in each of an app's dependencies, so an app only has to depend on `@geastack/parallel`. The compiler CLI takes it with `--plugin node_modules/@geastack/parallel/plugin/index.mjs`.
 

@@ -1,6 +1,6 @@
 {
   "name": "@geastack/parallel",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Multithreaded array operations for TypeScript programs compiled with GeaStack, inspired by Rayon.",
   "type": "module",
   "license": "Apache-2.0",
@@ -38,7 +38,7 @@
     "plugin": "./plugin/index.mjs"
   },
   "peerDependencies": {
-    "@geastack/compiler": "^1.0.29"
+    "@geastack/compiler": "^1.0.36"
   },
   "peerDependenciesMeta": {
     "@geastack/compiler": {
